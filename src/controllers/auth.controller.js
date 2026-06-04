@@ -1,16 +1,26 @@
 import { registerUser, loginUser } from "../services/auth.service.js";
+import { validationResult } from "express-validator";
 
 // Register Controller
 const registerController = async (req, res) => {
   try {
-    // ambil username dan pw
     const { username, password } = req.body;
+    const validationError = validationResult(req);
 
-    // cek usn dan pw
     if (!username || !password) {
       return res.status(400).json({
         error: true,
-        message: "Username dan password harus di isi!",
+        message: "Username dan password harus diisi!",
+      });
+    }
+
+    if (!validationError.isEmpty()) {
+      return res.status(400).json({
+        error: true,
+        data: validationError.array().map((error) => ({
+          field: error.path,
+          message: error.msg,
+        })),
       });
     }
 
@@ -22,9 +32,16 @@ const registerController = async (req, res) => {
       data: newUser,
     });
   } catch (error) {
-    return res.status(400).json({
+    if (error.message === "Username sudah ada!") {
+      return res.status(409).json({
+        error: true,
+        message: error.message,
+      });
+    }
+
+    return res.status(500).json({
       error: true,
-      message: error.message || "Terjadi kesalahan saat register"
+      message: "Internal Server Error",
     });
   }
 };
@@ -48,18 +65,14 @@ const loginController = async (req, res) => {
       error: false,
       message: "Berhasil login!",
       data: login,
-    })
-
+    });
   } catch (error) {
     const status = error.message.includes("tidak cocok") ? 401 : 500;
     return res.status(status).json({
       error: true,
-      message: error.message || "Terjadi kesalahan saat login"
+      message: error.message || "Terjadi kesalahan saat login",
     });
   }
-}
+};
 
-export {
-  registerController,
-  loginController,
-}
+export { registerController, loginController };

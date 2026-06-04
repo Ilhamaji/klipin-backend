@@ -10,7 +10,7 @@ const registerUser = async (username, password) => {
   });
 
   if (existingUser) {
-    throw new Error("Username sudh ada!");
+    throw new Error("Username sudah ada!");
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
