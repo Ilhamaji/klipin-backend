@@ -63,15 +63,22 @@ const loginUser = async (username, password) => {
   };
 };
 
-// Cek user_id
+// Cek user_id (true or false)
 const cekUserById = async (userId) => {
   return await User.count({
     where: { user_id: userId }
   }) > 0;
 }
 
+const getUserProfile = async (userId) => {
+  return await User.findOne({
+    where: { user_id: userId }
+  });
+}
+
 export {
   registerUser,
   loginUser,
-  cekUserById
+  cekUserById,
+  getUserProfile
 };

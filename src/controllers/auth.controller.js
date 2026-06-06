@@ -1,4 +1,4 @@
-import { registerUser, loginUser } from "../services/auth.service.js";
+import { registerUser, loginUser, cekUserById, getUserProfile } from "../services/auth.service.js";
 import { validationResult } from "express-validator";
 
 // Register Controller
@@ -75,4 +75,41 @@ const loginController = async (req, res) => {
   }
 };
 
-export { registerController, loginController };
+const getUserProfileController = async (req, res) => {
+  try {
+    const { userId } = req.user;
+
+    const existingUser = await cekUserById(userId);
+    if (!existingUser) {
+      return res.status(404).json({
+        error: true,
+        message: "User tidak ditemukan!",
+      });
+    }
+
+    const data = await getUserProfile(userId);
+    if (!data) {
+      return res.status(404).json({
+        error: true,
+        message: "Data user tidak ditemukan!",
+      });
+    }
+
+    return res.status(200).json({
+      error: false,
+      message: "Data user berhasil ditemkan!",
+      data: {
+        userId: data.user_id,
+        username: data.username,
+        createdAt: data.created_at,
+      }
+    })
+  } catch (error) {
+    return res.status(500).json({
+      error: true,
+      message: error.message,
+    });
+  }
+}
+
+export { registerController, loginController, getUserProfileController };
