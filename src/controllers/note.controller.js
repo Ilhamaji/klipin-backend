@@ -29,7 +29,7 @@ const getAllNoteController = async (req, res) => {
     const status = error.message.includes("tidak ditemukan") ? 404 : 500;
     return res.status(status).json({
       error: true,
-      message: error.message,
+      mC
     });
   }
 };

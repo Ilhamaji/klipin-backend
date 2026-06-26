@@ -5,11 +5,10 @@ import verifyToken from "../middlewares/auth.middleware.js";
 
 const authRoute = express.Router();
 
-// Register
-authRoute.post('/register', registerValidator, registerController);
 // Login
 authRoute.post("/login", loginController);
+
+export default authRoute;
 // Get User Profile
 authRoute.get("/profile", verifyToken, getUserProfileController);
 
-export default authRoute;

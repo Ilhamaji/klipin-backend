@@ -63,6 +63,14 @@ const loginUser = async (username, password) => {
   };
 };
 
+export {
+  registerUser,
+  loginUser,
+  cekUserById,
+  getUserProfile
+};
+
+
 // Cek user_id (true or false)
 const cekUserById = async (userId) => {
   return await User.count({
@@ -76,9 +84,3 @@ const getUserProfile = async (userId) => {
   });
 }
 
-export {
-  registerUser,
-  loginUser,
-  cekUserById,
-  getUserProfile
-};

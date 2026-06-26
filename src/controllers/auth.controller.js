@@ -45,7 +45,6 @@ const registerController = async (req, res) => {
     });
   }
 };
-
 const loginController = async (req, res) => {
   try {
     // ambil username dan pw
