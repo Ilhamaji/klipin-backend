@@ -4,6 +4,7 @@ import { welcomeRouter } from './routes/welcome.route.js';
 import authRoute from './routes/auth.route.js';
 import aiRoute from './routes/ai.route.js';
 import notesRouter from './routes/note.route.js';
+import articleRoute from './routes/article.route.js';
 
 const app = express();
 
@@ -17,5 +18,7 @@ app.use("/api/auth", authRoute);
 app.use("/api", aiRoute);
 // CRUD Notes
 app.use("/api/note", notesRouter);
+// Article Route
+app.use("/api/library", articleRoute);
 
 export default app;
