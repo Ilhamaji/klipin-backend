@@ -42,3 +42,20 @@ export const deleteSavedArticle = async (userId, articleId) => {
   await existing.destroy();
   return { message: 'Artikel berhasil dihapus dari library!' };
 };
+
+// Lihat semua artikel yg disimpan
+export const allSavedArticle = async (userId) => {
+  // cek apakah ada 1 atau lebih artikel
+  const article = await SavedArticle.findAll({
+    where: { user_id: userId },
+    include: [
+      {
+        model: Article,
+        as: "article",
+      }
+    ]
+  });
+
+  // kembalikan data seluruh artikel
+  return article;
+}
