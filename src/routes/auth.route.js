@@ -7,8 +7,9 @@ const authRoute = express.Router();
 
 // Login
 authRoute.post("/login", loginController);
-
-export default authRoute;
+// Register
+authRoute.post("/register", registerValidator, registerController);
 // Get User Profile
 authRoute.get("/profile", verifyToken, getUserProfileController);
 
+export default authRoute;
