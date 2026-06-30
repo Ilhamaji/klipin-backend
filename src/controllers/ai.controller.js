@@ -1,4 +1,5 @@
 import {
+  deleteHistoryById,
   getSearchHistory,
   searchArticlesAndClasify,
   summarizeArticle,
@@ -99,4 +100,38 @@ const summarizeController = async (req, res) => {
   }
 };
 
-export { searchController, summarizeController, historyController };
+// delete pencarian
+const deleteSearchHistoryController = async (req, res) => {
+  try {
+    const { userId } = req.user;
+    const { queryId } = req.params;
+
+    if (isNaN(queryId)) {
+      return res.status(400).json({
+        error: true,
+        message: "Format id tidak valid!",
+      });
+    }
+
+    const existingUser = await cekUserById(userId);
+    if (!existingUser) {
+      return res.status(404).json({
+        error: true,
+        message: "User tidak ditemukan!",
+      });
+    }
+
+    const result = await deleteHistoryById(queryId, userId);
+    return res.status(200).json({
+      error: false,
+      message: result.message,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: true,
+      message: error.message,
+    });
+  }
+}
+
+export { searchController, summarizeController, historyController, deleteSearchHistoryController };
