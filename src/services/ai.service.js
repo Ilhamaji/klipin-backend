@@ -1,7 +1,7 @@
 import axios from "axios";
 import { Query, Article, User } from "../models/index.js";
 
-const FASTAPI_URL = process.env.FASTAPI_URL || "http://127.0.0.1:8000";
+const FASTAPI_URL = process.env.FASTAPI_URL || "https://iruuuu-ai-service-skripsi.hf.space";
 
 // Pencarian
 const searchArticlesAndClasify = async (query, userId) => {

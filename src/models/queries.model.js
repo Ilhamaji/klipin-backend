@@ -22,6 +22,10 @@ const Query = sequelize.define(
       type: DataTypes.JSON,
       allowNull: false,
     },
+    model_comparison: {
+      type: DataTypes.JSON,
+      allowNull: true,
+    },
   },
   {
     tableName: "queries",
