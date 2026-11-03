@@ -3,9 +3,40 @@ import {
   getSearchHistory,
   searchArticlesAndClasify,
   summarizeArticle,
+  checkAiReady,
+  AiWarmupError,
 } from "../services/ai.service.js";
 
 import { cekUserById } from "../services/auth.service.js";
+
+/**
+ * Translate an AI-layer failure into an HTTP response.
+ * Warmup gets 503 + a retryable code so the UI can say "coba lagi sebentar"
+ * instead of showing a generic error.
+ */
+const respondAiError = (res, error) => {
+  if (error instanceof AiWarmupError || error.code === "AI_WARMING_UP") {
+    return res.status(503).json({
+      error: true,
+      code: "AI_WARMING_UP",
+      retryable: true,
+      retry_after_seconds: 30,
+      message: error.message,
+    });
+  }
+  if (error.code === "ECONNABORTED" || error.code === "ETIMEDOUT") {
+    return res.status(504).json({
+      error: true,
+      code: "AI_TIMEOUT",
+      retryable: true,
+      message:
+        "Layanan AI membutuhkan waktu lebih lama dari batas waktu server. Silakan coba lagi.",
+    });
+  }
+  const status = error.response?.status || 500;
+  const message = error.response?.data?.detail || "Gagal menghubungi layanan AI";
+  return res.status(status).json({ error: true, message });
+};
 
 const searchController = async (req, res) => {
   try {
@@ -35,17 +66,19 @@ const searchController = async (req, res) => {
     const result = await searchArticlesAndClasify(query, userId);
     return res.status(200).json(result);
   } catch (error) {
-    if (error.code === "ECONNABORTED" || error.code === "ETIMEDOUT") {
-      return res.status(504).json({
-        message:
-          "Layanan AI membutuhkan waktu lebih lama dari batas waktu server. Silakan coba lagi.",
-      });
-    }
-    const status = error.response?.status || 500;
-    const message =
-      error.response?.data?.detail || "Gagal menghubungi layanan AI";
-    return res.status(status).json({ message });
+    return respondAiError(res, error);
   }
+};
+
+/**
+ * GET /api/ai/ready
+ * Lightweight readiness probe. The frontend calls this when a page mounts so
+ * that real user activity warms the Space before they press "Ringkas".
+ * Always 200: the body tells the caller whether the AI is up yet.
+ */
+const aiReadyController = async (req, res) => {
+  const status = await checkAiReady();
+  return res.status(200).json(status);
 };
 
 // History search controller
@@ -99,10 +132,7 @@ const summarizeController = async (req, res) => {
     const result = await summarizeArticle(url);
     return res.status(200).json(result);
   } catch (error) {
-    const status = error.response?.status || 500;
-    const message =
-      error.response?.data?.detail || "Gagal menghubungi layanan AI";
-    return res.status(status).json({ message });
+    return respondAiError(res, error);
   }
 };
 
@@ -140,4 +170,4 @@ const deleteSearchHistoryController = async (req, res) => {
   }
 }
 
-export { searchController, summarizeController, historyController, deleteSearchHistoryController };
+export { searchController, summarizeController, historyController, deleteSearchHistoryController, aiReadyController };

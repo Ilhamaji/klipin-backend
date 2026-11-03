@@ -9,8 +9,54 @@ const FASTAPI_URL = process.env.FASTAPI_URL || "https://iruuuu-ai-service-skrips
 // browser reports as a CORS error).
 const AI_TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS) || 9000;
 
-const postToAi = (path, payload) =>
-  axios.post(`${FASTAPI_URL}${path}`, payload, { timeout: AI_TIMEOUT_MS });
+/**
+ * Error for "the AI Space is still booting".
+ *
+ * A free-tier Space sleeps when idle. The first request after that has to wait
+ * for the container to start (tens of seconds), which is far longer than the
+ * Netlify function budget. We surface this as a distinct, retryable condition
+ * so the client can show "sedang disiapkan, coba lagi" instead of a generic
+ * failure.
+ */
+export class AiWarmupError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "AiWarmupError";
+    this.code = "AI_WARMING_UP";
+  }
+}
+
+const WARMUP_MESSAGE =
+  "Layanan AI sedang disiapkan (pertama kali dipakai butuh beberapa saat). Silakan coba lagi dalam 30 detik.";
+
+const postToAi = async (path, payload, timeoutMs = AI_TIMEOUT_MS) => {
+  try {
+    return await axios.post(`${FASTAPI_URL}${path}`, payload, { timeout: timeoutMs });
+  } catch (error) {
+    // ECONNABORTED/ETIMEDOUT from our own ceiling, or 502/503/504 from the
+    // proxy while the container starts, both mean "not ready yet".
+    const status = error.response?.status;
+    const isTimeout = error.code === "ECONNABORTED" || error.code === "ETIMEDOUT";
+    const isStarting = status === 502 || status === 503 || status === 504;
+    if (isTimeout || isStarting) {
+      throw new AiWarmupError(WARMUP_MESSAGE);
+    }
+    throw error;
+  }
+};
+
+/**
+ * Cheap readiness probe used to warm the Space from real user activity.
+ * Never throws: a sleeping Space simply reports ready=false.
+ */
+const checkAiReady = async () => {
+  try {
+    const response = await axios.get(`${FASTAPI_URL}/health`, { timeout: 4000 });
+    return { ready: response.status === 200, status: response.status };
+  } catch {
+    return { ready: false, status: null };
+  }
+};
 
 // Pencarian
 const searchArticlesAndClasify = async (query, userId) => {
@@ -55,12 +101,18 @@ const deleteHistoryById = async (queryId, userId) => {
 // Ringkasan otomatis
 const summarizeArticle = async (url) => {
   // Summarizing downloads a PDF and calls the LLM, so allow the platform max.
-  const response = await axios.post(
-    `${FASTAPI_URL}/ai/summarize`,
+  const response = await postToAi(
+    "/ai/summarize",
     { url },
-    { timeout: Number(process.env.AI_SUMMARIZE_TIMEOUT_MS) || 55000 },
+    Number(process.env.AI_SUMMARIZE_TIMEOUT_MS) || 55000,
   );
   return response.data;
 };
 
-export { searchArticlesAndClasify, summarizeArticle, getSearchHistory, deleteHistoryById };
+export {
+  searchArticlesAndClasify,
+  summarizeArticle,
+  getSearchHistory,
+  deleteHistoryById,
+  checkAiReady,
+};
