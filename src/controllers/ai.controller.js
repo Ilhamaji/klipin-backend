@@ -35,6 +35,12 @@ const searchController = async (req, res) => {
     const result = await searchArticlesAndClasify(query, userId);
     return res.status(200).json(result);
   } catch (error) {
+    if (error.code === "ECONNABORTED" || error.code === "ETIMEDOUT") {
+      return res.status(504).json({
+        message:
+          "Layanan AI membutuhkan waktu lebih lama dari batas waktu server. Silakan coba lagi.",
+      });
+    }
     const status = error.response?.status || 500;
     const message =
       error.response?.data?.detail || "Gagal menghubungi layanan AI";
