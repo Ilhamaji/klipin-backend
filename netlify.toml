@@ -3,7 +3,7 @@
   functions = "netlify/functions"
 
 [functions]
-  external_node_modules = ["express", "sequelize", "pg", "bcrypt"]
+  external_node_modules = ["express", "sequelize", "pg", "pg-hstore", "bcrypt"]
   node_bundler = "esbuild"
 
 [[redirects]]
