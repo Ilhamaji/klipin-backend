@@ -2,52 +2,54 @@
 
 # Klipin — Backend API
 
-**Express.js REST API gateway** untuk Klipin, sistem riset referensi & literatur skripsi.
+**Express.js REST API gateway** for Klipin, a literature-research tool for thesis writing.
 
 [![Status](https://img.shields.io/badge/status-academic%20project-blue?style=flat-square)](#)
 [![Node.js](https://img.shields.io/badge/Node.js-18%2F20-339933?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org)
 [![Express](https://img.shields.io/badge/Express.js-4-000000?style=flat-square&logo=express&logoColor=white)](https://expressjs.com)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Supabase-4169E1?style=flat-square&logo=postgresql&logoColor=white)](https://supabase.com)
 
+**English** · [Bahasa Indonesia](README.id.md)
+
 </div>
 
 ---
 
-## Tentang
+## About
 
-Backend dari **Klipin**, aplikasi bantu mahasiswa mencari, menyimpan, dan meringkas referensi jurnal. Repo ini adalah *API gateway* Node.js yang menangani autentikasi, persistensi data, dan penerusan permintaan ke layanan AI Python terpisah.
+The backend of **Klipin**, a tool that helps students find, save, and summarise journal references. This repo is the Node.js *API gateway*: it handles authentication and persistence, and forwards AI work to a separate Python service.
 
-> Frontend ada di repo [`frontend-klipin`](https://github.com/Ilhamaji/frontend-klipin).
+> The frontend lives in [`klipin-frontend`](https://github.com/Ilhamaji/klipin-frontend).
 
-## Tanggung Jawab
+## Responsibilities
 
 | Area | Detail |
 | --- | --- |
-| **Autentikasi** | Registrasi, login, hashing password (`bcryptjs`), dan penerbitan **JWT**. |
-| **AI Gateway** | Meneruskan pencarian paper & permintaan ringkasan LLM ke layanan Python (FastAPI / Hugging Face). |
-| **Persistensi** | Menyimpan riwayat pencarian, artikel yang di-bookmark, dan metadata klasifikasi di PostgreSQL (Supabase). |
-| **Validasi & Middleware** | Kebijakan CORS, verifikasi otorisasi, dan penanganan error terpusat. |
-| **Readiness probe** | Menangani *cold start* layanan AI di Hugging Face Space dengan probe kesiapan. |
+| **Authentication** | Registration, login, password hashing (`bcryptjs`), and **JWT** issuance. |
+| **AI gateway** | Forwards paper search and LLM summary requests to the Python service (FastAPI / Hugging Face). |
+| **Persistence** | Stores search history, bookmarked articles, and classification metadata in PostgreSQL (Supabase). |
+| **Validation & middleware** | CORS policy, authorisation checks, and centralised error handling. |
+| **Readiness probe** | Covers cold starts on the Hugging Face Space that hosts the AI service. |
 
 ## Tech Stack
 
-| Bagian | Teknologi |
+| Layer | Technology |
 | --- | --- |
 | Runtime | Node.js v18 / v20 |
 | Framework | Express.js |
 | Database | PostgreSQL via Supabase (`pg`) |
 | Auth | `jsonwebtoken`, `bcryptjs` |
-| HTTP Client | `axios` |
-| Deploy | Netlify Functions (`netlify.toml`) |
+| HTTP client | `axios` |
+| Deployment | Netlify Functions (`netlify.toml`) |
 
-## Menjalankan
+## Getting Started
 
-### 1. Prasyarat
+### 1. Prerequisites
 
-- Node.js v18 atau v20
-- Instance PostgreSQL (lokal atau Supabase)
+- Node.js v18 or v20
+- A PostgreSQL instance (local or Supabase)
 
-### 2. Clone & install
+### 2. Clone and install
 
 ```bash
 git clone https://github.com/Ilhamaji/klipin-backend.git
@@ -68,36 +70,29 @@ JWT_SECRET=your_secret_key
 AI_SERVICE_URL=https://your-ai-service.hf.space
 ```
 
-### 4. Migrasi database
+### 4. Migrate the database
 
-```bash
-# jalankan file di migrations/ sesuai urutan
-```
+Run the files in `migrations/` in order.
 
-### 5. Jalankan
+### 5. Start
 
 ```bash
 npm start
 ```
 
-## Struktur
+## Project Layout
 
 ```
-server.js          # entrypoint Express
-config/            # koneksi database & konfigurasi
-migrations/        # skema SQL
-models/            # query & model data
-src/               # route, controller, middleware
-netlify/           # adapter deploy Netlify
+server.js          # Express entrypoint
+config/            # database connection and config
+migrations/        # SQL schema
+models/            # queries and data models
+src/               # routes, controllers, middleware
+netlify/           # Netlify deploy adapter
 ```
-
-## Dokumentasi
-
-- 🇬🇧 [English](README.md)
-- 🇮🇩 [Bahasa Indonesia](README.id.md)
 
 ---
 
 <div align="center">
-Dibuat oleh <a href="https://github.com/Ilhamaji">Ilham Aji</a>
+Built by <a href="https://github.com/Ilhamaji">Ilham Aji</a>
 </div>
